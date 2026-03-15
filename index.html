@@ -52,30 +52,26 @@
 
         <section id="introduction" class="ds-u-measure--wide ds-u-margin-bottom--4">
             <p class="ds-text-body--lg">
-                Our software calculates the number and proportion of procedures submitted to
-                Medicare Part B by advance practice providers between 2010 and 2024.
-                Advanced practice providers include physician assistants, nurse practitioners, certified registered
-                nurse anesthetists, certified clinical nurse specialists, and certified nurse midwives.
-                The denominator of the proportion includes claims submitted by advanced practice
-                providers and physicians.
+                Calculate the number and proportion of procedures submitted to
+                Medicare Part B by advanced practice providers (physician assistants, nurse practitioners,
+                certified registered nurse anesthetists, certified clinical nurse specialists, and
+                certified nurse midwives) between 2010 and 2024. The denominator includes claims
+                submitted by advanced practice providers and physicians.
+            </p>
+            <p class="ds-text">
+                Enter up to twenty-five HCPCS procedure codes separated by semicolons.
+                When multiple codes are entered, results are aggregated across all codes.
             </p>
         </section>
 
         <section id="filters" class="ds-u-measure--wide">
-            <p class="ds-text">
-                Enter up to twenty-five procedure codes, each separated by a semicolon with no spaces (e.g., 31237;S2342;...).
-                If more than one procedure code is entered, the output calculates the number and proportion of procedures submitted
-                across all entered procedures codes, not each individual code.
-            </p>
 
             <form id="queryForm" class="ds-u-margin-top--2">
-                <label class="ds-c-label" for="procedureCode">
-                    Procedure Codes<br>
-                    <span class="ds-c-label__hint">Semicolon-separated HCPCS codes</span>
-                </label>
-                <input class="ds-c-field" type="text" id="procedureCode" placeholder="e.g. 31237;S2342" minlength="5" maxlength="149">
+                <label class="ds-c-label" for="procedureCode">Procedure Codes</label>
+                <p class="ds-c-label__hint ds-u-margin-top--0" id="procedureCodeHint">Semicolon-separated HCPCS codes</p>
+                <input class="ds-c-field" type="text" id="procedureCode" placeholder="e.g. 31237;S2342" minlength="5" maxlength="149" style="max-width:24rem;">
 
-                <button type="submit" class="ds-c-button ds-c-button--solid ds-u-margin-top--2" id="downloadBtn">Run Query and Download Results</button>
+                <button type="submit" class="ds-c-button ds-c-button--solid ds-u-margin-top--2" id="downloadBtn">Run Query</button>
             </form>
 
             <div id="progressContainer" class="ds-u-margin-top--2" style="display:none;">
@@ -103,13 +99,25 @@
                 </div>
             </div>
 
-            <div id="resultsSummary" class="ds-u-margin-top--3">
-                <h2 class="ds-text-heading--xl" id="summaryHeading" style="display:none;">Records by procedure code</h2>
-                <ul class="ds-c-list" id="summaryList"></ul>
+            <details id="resultsSummary" class="ds-u-margin-top--2" style="display:none;">
+                <summary class="ds-text" style="cursor:pointer;">Records by procedure code</summary>
+                <ul class="ds-c-list ds-u-margin-top--1" id="summaryList"></ul>
+            </details>
+
+            <div id="resultsChartContainer" class="ds-u-margin-top--3" style="display:none;">
+                <div class="ds-u-display--flex ds-u-justify-content--between ds-u-align-items--center ds-u-margin-bottom--2">
+                    <h2 class="ds-text-heading--xl ds-u-margin-bottom--0">Results</h2>
+                    <button type="button" class="ds-c-button ds-c-button--outline" id="downloadCsvBtn">Download Full CSV</button>
+                </div>
+                <canvas id="resultsChart"></canvas>
+                <p class="ds-text ds-u-margin-top--1 ds-u-color--muted" style="font-size:0.875rem;">
+                    Note: The proportion of procedures submitted by advanced practice providers and physicians sums to 100%.
+                </p>
             </div>
         </section>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <script src="script.js"></script>
 </body>
 

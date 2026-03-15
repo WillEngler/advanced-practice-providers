@@ -71,12 +71,12 @@ function setWarning(msg) {
 }
 
 function showResultsSummary(codeList, combinedData) {
-    const heading = document.getElementById("summaryHeading");
+    const details = document.getElementById("resultsSummary");
     const list = document.getElementById("summaryList");
     list.innerHTML = "";
 
     if (codeList.length <= 1) {
-        heading.style.display = "none";
+        details.style.display = "none";
         return;
     }
 
@@ -100,19 +100,20 @@ function showResultsSummary(codeList, combinedData) {
         list.appendChild(li);
     });
 
-    heading.style.display = "block";
+    details.style.display = "block";
 }
 
 function clearResults() {
-    document.getElementById("summaryHeading").style.display = "none";
+    document.getElementById("resultsSummary").style.display = "none";
     document.getElementById("summaryList").innerHTML = "";
+    hideResultsChart();
     setWarning("");
 }
 
 function setButtonEnabled(enabled) {
     const btn = document.getElementById("downloadBtn");
     btn.disabled = !enabled;
-    btn.textContent = enabled ? "Run Query and Download Results" : "Running...";
+    btn.textContent = enabled ? "Run Query" : "Running...";
 }
 
 function showProgress(completed, total) {
@@ -127,6 +128,156 @@ function showProgress(completed, total) {
 
 function hideProgress() {
     document.getElementById("progressContainer").style.display = "none";
+}
+
+let resultsChart = null;
+
+// Chart.js plugin: draw labels at the right end of each line
+const directLabelPlugin = {
+    id: 'directLabel',
+    afterDatasetsDraw(chart) {
+        const ctx = chart.ctx;
+        const MIN_GAP = 14; // minimum vertical pixels between labels
+
+        // Collect label positions
+        const labels = [];
+        chart.data.datasets.forEach((dataset, i) => {
+            const meta = chart.getDatasetMeta(i);
+            if (meta.hidden) return;
+            const lastPoint = meta.data[meta.data.length - 1];
+            if (!lastPoint) return;
+            labels.push({
+                text: dataset.label,
+                x: lastPoint.x + 8,
+                rawY: lastPoint.y,
+                y: lastPoint.y,
+                color: dataset.borderColor,
+                bold: dataset.borderWidth > 2,
+            });
+        });
+
+        // Sort by vertical position and push apart any that overlap
+        labels.sort((a, b) => a.rawY - b.rawY);
+        for (let i = 1; i < labels.length; i++) {
+            const gap = labels[i].y - labels[i - 1].y;
+            if (gap < MIN_GAP) {
+                labels[i].y = labels[i - 1].y + MIN_GAP;
+            }
+        }
+
+        labels.forEach(lbl => {
+            ctx.save();
+            ctx.font = lbl.bold ? 'bold 12px sans-serif' : '11px sans-serif';
+            ctx.fillStyle = lbl.color;
+            ctx.textBaseline = 'middle';
+            ctx.fillText(lbl.text, lbl.x, lbl.y);
+            ctx.restore();
+        });
+    }
+};
+
+function showResultsChart(taggedData) {
+    const container = document.getElementById("resultsChartContainer");
+    const ctx = document.getElementById("resultsChart");
+
+    if (resultsChart) {
+        resultsChart.destroy();
+        resultsChart = null;
+    }
+
+    const years = [...new Set(taggedData.map(r => r.year))].sort();
+    const byType = new Map();
+    taggedData.forEach(row => {
+        // Omit physicians — they are the complement
+        if (row.clinician_type === "Physicians") return;
+        if (!byType.has(row.clinician_type)) {
+            byType.set(row.clinician_type, new Map());
+        }
+        byType.get(row.clinician_type).set(row.year, row.proportion_of_procedures_clinician_type);
+    });
+
+    const colors = {
+        "Advanced Practice Providers":             "#0071bc",
+        "Physician Assistants":                    "#02bfe7",
+        "Nurse Practitioners":                     "#2e8540",
+        "Certified Registered Nurse Anesthetists": "#e31c3d",
+        "Certified Clinical Nurse Specialists":    "#fdb81e",
+        "Certified Nurse Midwives":                "#981b1e",
+    };
+
+    const datasets = [];
+    byType.forEach((yearMap, clinicianType) => {
+        const isAggregate = clinicianType === "Advanced Practice Providers";
+        const dataValues = years.map(y => {
+            const v = yearMap.get(y);
+            return typeof v === 'number' ? v * 100 : null;
+        });
+        // Omit lines that are zero across all years
+        if (dataValues.every(v => v === null || v === 0)) return;
+        datasets.push({
+            label: isAggregate ? "All Advanced Practice Providers" : clinicianType,
+            data: dataValues,
+            borderColor: colors[clinicianType] || "#5b616b",
+            backgroundColor: "transparent",
+            borderWidth: isAggregate ? 2.5 : 1.5,
+            pointRadius: 0,
+            pointHoverRadius: 4,
+            tension: 0.15,
+        });
+    });
+
+    // Aggregate line renders last (on top)
+    datasets.sort((a, b) => {
+        const aAgg = a.label === "All Advanced Practice Providers" ? 1 : 0;
+        const bAgg = b.label === "All Advanced Practice Providers" ? 1 : 0;
+        return aAgg - bAgg;
+    });
+
+    resultsChart = new Chart(ctx, {
+        type: 'line',
+        data: { labels: years, datasets },
+        plugins: [directLabelPlugin],
+        options: {
+            responsive: true,
+            layout: {
+                padding: { right: 200 } // room for direct labels
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': ' + context.parsed.y.toFixed(2) + '%';
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                },
+                y: {
+                    title: { display: true, text: 'Proportion of procedures (%)' },
+                    beginAtZero: true,
+                    grid: { color: 'rgba(0,0,0,0.06)' },
+                    ticks: {
+                        callback: function(value) { return value + '%'; }
+                    }
+                }
+            }
+        }
+    });
+
+    container.style.display = "block";
+}
+
+function hideResultsChart() {
+    const container = document.getElementById("resultsChartContainer");
+    container.style.display = "none";
+    if (resultsChart) {
+        resultsChart.destroy();
+        resultsChart = null;
+    }
 }
 
 document.getElementById("queryForm").addEventListener("submit", function (e) {
@@ -191,8 +342,18 @@ document.getElementById("queryForm").addEventListener("submit", function (e) {
             }
             showResultsSummary(codeList, combinedData);
 
-            setStatus(`Done — downloaded ${finalData.length.toLocaleString()} rows.`);
-            downloadCSV(finalData, codeList);
+            const taggedData = buildTaggedData(finalData, codeList);
+            showResultsChart(taggedData);
+
+            // Wire up the download button for this result set
+            const dlBtn = document.getElementById("downloadCsvBtn");
+            const newDlBtn = dlBtn.cloneNode(true); // remove old listeners
+            dlBtn.parentNode.replaceChild(newDlBtn, dlBtn);
+            newDlBtn.addEventListener("click", function () {
+                downloadCSV(taggedData);
+            });
+
+            setStatus(`Done — ${taggedData.length.toLocaleString()} rows.`);
             setButtonEnabled(true);
             setTimeout(() => setStatus(""), 4000);
         })
@@ -394,10 +555,10 @@ function getClinician_type(record) {
     return record['advanced_practice_provider'] === 1 ? "Advanced Practice Providers" : "Physicians";
 }
 
-// Convert JSON to CSV and trigger a single download
-function downloadCSV(data, codeList) {
+// Build the final tagged output rows from internal data
+function buildTaggedData(data, codeList) {
     const codesValue = codeList.join(";");
-    const taggedData = data.map(record => ({
+    return data.map(record => ({
         year: record['year'],
         procedure_codes: codesValue,
         clinician_type: getClinician_type(record),
@@ -405,6 +566,10 @@ function downloadCSV(data, codeList) {
         proportion_of_procedures_clinician_type: record['proportion_of_procedures'],
         number_of_procedures_all_clinicians: record['number_of_procedures_all_clinicians'],
     }));
+}
+
+// Trigger CSV download from pre-built tagged data
+function downloadCSV(taggedData) {
     const csv = convertToCSV(taggedData);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
@@ -456,6 +621,7 @@ if (typeof module !== 'undefined') {
         collapseByAdvancedPracticeProvider,
         addAdvancedPracticePct,
         getClinician_type,
+        buildTaggedData,
         convertToCSV,
     };
 }

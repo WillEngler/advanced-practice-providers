@@ -17,6 +17,7 @@ const {
     collapseByAdvancedPracticeProvider,
     addAdvancedPracticePct,
     getClinician_type,
+    buildTaggedData,
 } = require('../script.js');
 
 const FIXTURE_DIR = path.join(__dirname, 'fixtures');
@@ -44,15 +45,7 @@ function sortFinalData(data) {
 
 // Build the final CSV-shaped output (same as downloadCSV produces)
 function buildOutput(finalData, codeList) {
-    const codesValue = codeList.join(";");
-    return finalData.map(record => ({
-        year: record['year'],
-        procedure_codes: codesValue,
-        clinician_type: getClinician_type(record),
-        number_of_procedures_clinician_type: record['number_of_procedures'],
-        proportion_of_procedures_clinician_type: record['proportion_of_procedures'],
-        number_of_procedures_all_clinicians: record['number_of_procedures_all_clinicians'],
-    }));
+    return buildTaggedData(finalData, codeList);
 }
 
 async function runQuery(codeList) {

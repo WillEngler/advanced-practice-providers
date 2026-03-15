@@ -6,61 +6,79 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Procedures Submitted by APPs</title>
 
+    <link rel="stylesheet" href="https://design.cms.gov/cdn/design-system/9.0.1/css/index.css" />
+    <link rel="stylesheet" href="https://design.cms.gov/cdn/design-system/9.0.1/css/core-theme.css" />
+
     <style>
-        #procedureCode {
-            display: block;
-            margin-top: 5px;
+        #statusMsg {
+            display: none;
+            margin-top: 0.5rem;
+            color: var(--color-muted, #555);
+            font-style: italic;
         }
 
-        #downloadBtn {
+        #statusMsg.visible {
             display: block;
-            margin-top: 15px;
-            margin-bottom: 5px;
+        }
+
+        #errorMsg {
+            display: none;
+        }
+
+        #errorMsg.visible {
+            display: block;
         }
 
         #downloadBtn:disabled {
+            opacity: 0.65;
             cursor: not-allowed;
-            opacity: 0.6;
-        }
-
-        #statusMsg {
-            display: none;
-            font-style: italic;
-            color: #555;
-            margin-top: 5px;
         }
     </style>
 </head>
 
-<body>
-    <header>
-        <h1>Procedures Submitted to Medicare Part B by Advanced Practice Providers between 2010 and 2024</h1>
-    </header>
+<body class="ds-base">
+    <div class="ds-l-container ds-u-padding-y--4">
+        <header class="ds-u-margin-bottom--4">
+            <h1 class="ds-text-heading--3xl">Procedures Submitted to Medicare Part B by Advanced Practice Providers between 2010 and 2024</h1>
+        </header>
 
-    <section id="introduction">
-        <p>
-            Our software calculates the number and proportion of procedures submitted to
-            Medicare Part B by advance practice providers between 2010 and 2024. 
-            Advanced practice providers include physician assistants, nurse practitioners, certified registered 
-            nurse anesthetists, certified clinical nurse specialists, and certified nurse midwives. 
-            The denominator of the proportion includes claims submitted by advanced practice 
-            providers and physicians.
-        </p>
-    </section>
+        <section id="introduction" class="ds-u-measure--wide ds-u-margin-bottom--4">
+            <p class="ds-text-body--lg">
+                Our software calculates the number and proportion of procedures submitted to
+                Medicare Part B by advance practice providers between 2010 and 2024.
+                Advanced practice providers include physician assistants, nurse practitioners, certified registered
+                nurse anesthetists, certified clinical nurse specialists, and certified nurse midwives.
+                The denominator of the proportion includes claims submitted by advanced practice
+                providers and physicians.
+            </p>
+        </section>
 
-    <section id="filters">
-        <p>
-            Enter up to twenty-five procedure codes, each separated by a semicolon with no spaces (e.g., 31237;S2342;...).
-            If more than one procedure code is entered, the output calculates the number and proportion of procedures submitted 
-            across all entered procedures codes, not each individual code. 
-        </p>
+        <section id="filters" class="ds-u-measure--wide">
+            <p class="ds-text">
+                Enter up to twenty-five procedure codes, each separated by a semicolon with no spaces (e.g., 31237;S2342;...).
+                If more than one procedure code is entered, the output calculates the number and proportion of procedures submitted
+                across all entered procedures codes, not each individual code.
+            </p>
 
-        <label for="procedureCode">Procedure Codes:</label>
-        <input type="text" id="procedureCode" placeholder="" minlength="5" maxlength="149">
+            <div class="ds-u-margin-top--2">
+                <label class="ds-c-label" for="procedureCode">
+                    Procedure Codes<br>
+                    <span class="ds-c-label__hint">Semicolon-separated HCPCS codes</span>
+                </label>
+                <input class="ds-c-field" type="text" id="procedureCode" placeholder="e.g. 31237;S2342" minlength="5" maxlength="149">
+            </div>
 
-        <button id="downloadBtn">Run Query and Download Results</button>
-        <p id="statusMsg"></p>
-    </section>
+            <button class="ds-c-button ds-c-button--solid ds-u-margin-top--2" id="downloadBtn">Run Query and Download Results</button>
+            <p id="statusMsg" class="ds-text" role="status"></p>
+
+            <div id="errorMsg" class="ds-c-alert ds-c-alert--error ds-u-margin-top--2" role="alert">
+                <div class="ds-c-alert__body">
+                    <h3 class="ds-c-alert__heading">Error</h3>
+                    <p class="ds-c-alert__text" id="errorText"></p>
+                </div>
+            </div>
+        </section>
+    </div>
 
     <script src="script.js"></script>
 </body>

@@ -47,11 +47,19 @@ const validProviderSpecCodes = new Set([
     "D3","D4","D7","D8","F6"
 ]);
 
-// Helper: update status message
+// Helper: update status message (lightweight inline text)
 function setStatus(msg) {
     const el = document.getElementById("statusMsg");
     el.textContent = msg;
-    el.style.display = msg ? "block" : "none";
+    el.classList.toggle("visible", !!msg);
+}
+
+// Helper: show/hide error message (uses CMS alert component)
+function setError(msg) {
+    const el = document.getElementById("errorMsg");
+    const textEl = document.getElementById("errorText");
+    textEl.textContent = msg;
+    el.classList.toggle("visible", !!msg);
 }
 
 // Helper: enable/disable the download button
@@ -68,12 +76,14 @@ document.getElementById("downloadBtn").addEventListener("click", function () {
     const selectedYears = Object.keys(yearDatasetMap);
 
     if (codeList.length === 0 || codeList.length > 25) {
-        alert("Please enter between 1 and 25 procedure codes, separated by semicolons.");
+        setError("Please enter between 1 and 25 procedure codes, separated by semicolons.");
         return;
     }
 
-    // Disable button and show status
+    // Clear any previous error and disable button
+    setError("");
     setButtonEnabled(false);
+    setStatus("Fetching data from CMS...");
 
 
     const allPromises = selectedYears.map(year => {
@@ -99,7 +109,7 @@ document.getElementById("downloadBtn").addEventListener("click", function () {
                 const labelB = getClinician_type(b);
                 return clinicianTypeOrder.indexOf(labelA) - clinicianTypeOrder.indexOf(labelB) || Number(a.year) - Number(b.year);
             });
-            setStatus(`Query complete. Downloading ${finalData.length.toLocaleString()} rows...`);
+            setStatus(`Done — downloaded ${finalData.length.toLocaleString()} rows.`);
             downloadCSV(finalData, codeList);
             setButtonEnabled(true);
             setTimeout(() => setStatus(""), 4000);
@@ -108,7 +118,7 @@ document.getElementById("downloadBtn").addEventListener("click", function () {
             console.error("Error fetching data:", error);
             setStatus("");
             setButtonEnabled(true);
-            alert("There was an error fetching the data:\n\n" + error.message);
+            setError("There was an error fetching the data: " + error.message);
         });
 });
 

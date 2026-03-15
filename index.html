@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Procedures Submitted by APPs</title>
+
+    <style>
+        #procedureCode {
+            display: block;
+            margin-top: 5px;
+        }
+
+        #downloadBtn {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 5px;
+        }
+
+        #downloadBtn:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        #statusMsg {
+            display: none;
+            font-style: italic;
+            color: #555;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Procedures Submitted to Medicare Part B by Advanced Practice Providers between 2010 and 2024</h1>
+    </header>
+
+    <section id="introduction">
+        <p>
+            Our software calculates the number and proportion of procedures submitted to
+            Medicare Part B by advance practice providers between 2010 and 2024. 
+            Advanced practice providers include physician assistants, nurse practitioners, certified registered 
+            nurse anesthetists, certified clinical nurse specialists, and certified nurse midwives. 
+            The denominator of the proportion includes claims submitted by advanced practice 
+            providers and physicians.
+        </p>
+    </section>
+
+    <section id="filters">
+        <p>
+            Enter up to twenty-five procedure codes, each separated by a semicolon with no spaces (e.g., 31237;S2342;...).
+            If more than one procedure code is entered, the output calculates the number and proportion of procedures submitted 
+            across all entered procedures codes, not each individual code. 
+        </p>
+
+        <label for="procedureCode">Procedure Codes:</label>
+        <input type="text" id="procedureCode" placeholder="" minlength="5" maxlength="149">
+
+        <button id="downloadBtn">Run Query and Download Results</button>
+        <p id="statusMsg"></p>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

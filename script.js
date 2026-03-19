@@ -206,32 +206,26 @@ function showResultsChart(taggedData) {
     };
 
     const datasets = [];
-    byType.forEach((yearMap, clinicianType) => {
-        const isAggregate = clinicianType === "Advanced Practice Providers";
+    // Only show the aggregate APP line
+    const appYearMap = byType.get("Advanced Practice Providers");
+    if (appYearMap) {
         const dataValues = years.map(y => {
-            const v = yearMap.get(y);
+            const v = appYearMap.get(y);
             return typeof v === 'number' ? v * 100 : null;
         });
-        // Omit lines that are zero across all years
-        if (dataValues.every(v => v === null || v === 0)) return;
-        datasets.push({
-            label: isAggregate ? "All Advanced Practice Providers" : clinicianType,
-            data: dataValues,
-            borderColor: colors[clinicianType] || "#5b616b",
-            backgroundColor: "transparent",
-            borderWidth: isAggregate ? 2.5 : 1.5,
-            pointRadius: 0,
-            pointHoverRadius: 4,
-            tension: 0.15,
-        });
-    });
-
-    // Aggregate line renders last (on top)
-    datasets.sort((a, b) => {
-        const aAgg = a.label === "All Advanced Practice Providers" ? 1 : 0;
-        const bAgg = b.label === "All Advanced Practice Providers" ? 1 : 0;
-        return aAgg - bAgg;
-    });
+        if (!dataValues.every(v => v === null || v === 0)) {
+            datasets.push({
+                label: "Advanced Practice Providers",
+                data: dataValues,
+                borderColor: colors["Advanced Practice Providers"] || "#0071bc",
+                backgroundColor: "#0071bc",
+                borderWidth: 2.5,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                tension: 0.15,
+            });
+        }
+    }
 
     resultsChart = new Chart(ctx, {
         type: 'line',
@@ -240,7 +234,7 @@ function showResultsChart(taggedData) {
         options: {
             responsive: true,
             layout: {
-                padding: { right: 200 } // room for direct labels
+                padding: { right: 180 } // room for direct label
             },
             plugins: {
                 legend: { display: false },
@@ -257,11 +251,16 @@ function showResultsChart(taggedData) {
                     grid: { display: false },
                 },
                 y: {
-                    title: { display: true, text: 'Proportion of procedures (%)' },
+                    title: {
+                        display: true,
+                        text: ['Proportion of Procedures Submitted', 'by Advanced Practice Providers'],
+                        font: { size: 13 },
+                        padding: { bottom: 4 }
+                    },
                     beginAtZero: true,
                     grid: { color: 'rgba(0,0,0,0.06)' },
                     ticks: {
-                        callback: function(value) { return value + '%'; }
+                        callback: function(value) { return value.toFixed(1) + '%'; }
                     }
                 }
             }

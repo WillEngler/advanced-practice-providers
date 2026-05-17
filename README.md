@@ -1,18 +1,19 @@
 # advanced-practice-providers
 
-A small website that helps researchers see what share of Medicare Part B procedures are billed by **Advanced Practice Providers** (APPs) — physician assistants, nurse practitioners, CRNAs, anesthesiology assistants, clinical nurse specialists, and certified nurse midwives — versus physicians, from 2010 onward.
+A web application to calculate the number and proportion of procedures submitted to Medicare Part B by advanced practice providers (APPs; physician assistants, nurse practitioners, certified registered nurse anesthetists, anesthesiology assistants, certified clinical nurse specialists, and certified nurse midwives) between 2010 and 2024. 
 
 **Live site:** [open-hsr.github.io/advanced-practice-providers](https://open-hsr.github.io/advanced-practice-providers)
 
-You enter up to 25 HCPCS procedure codes (separated by semicolons), and the page queries CMS's public data for every year and shows you a chart of the APP share over time. You can also download the underlying numbers as a CSV.
+The user inputs up to twenty-five HCPCS procedure codes separated by semicolons, and a request for all publicly available data is sent to the CMS API for the entered codes. Procedures submitted by APPs and physicians are identified with clinician specialty codes and summed. The proportion of procedures submitted by APPs and physicians is calculated, and the output includes a line chart and downloadable CSV file.
 
-## What's in this repo
+## What's in this repository
 
 - **`index.html`** — the page you see when you visit the site. Static HTML; nothing to compile or install.
 - **`script.js`** — all the logic behind the page: fetching data from CMS, aggregating it by year and clinician type, drawing the chart, building the CSV.
 - **`test/`** — automated tests that check the calculations. Several different angles, including one that re-computes the numbers from CMS's full annual data files using a completely separate implementation, just to make sure the website's numbers agree. See [`test/README.md`](test/README.md) for details.
 - **`CLAUDE.md`** — guidance notes for AI coding assistants working on this repo.
 - **`LICENSE`** — open-source license.
+- **`.gitignore`** — [a standard file](https://docs.github.com/en/get-started/git-basics/ignoring-files) that tells Git not to save certain files (like large CSVs downloaded for testing) to this repository
 
 That's the whole repo. There's no build system, no server, no deploy step beyond pushing to GitHub.
 

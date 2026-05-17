@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-A static web application that queries the CMS (Centers for Medicare & Medicaid Services) public API to calculate the number and proportion of Medicare Part B procedures submitted by Advanced Practice Providers (APPs) from 2010-2024. APPs include physician assistants, nurse practitioners, CRNAs, clinical nurse specialists, and certified nurse midwives.
+A web application to calculate the number and proportion of procedures submitted to Medicare Part B by advanced practice providers (APPs; physician assistants, nurse practitioners, certified registered nurse anesthetists, anesthesiology assistants, certified clinical nurse specialists, and certified nurse midwives) between 2010 and 2024.
 
 ## Development
 
@@ -50,7 +50,7 @@ All application logic lives in `script.js`; the UI is in `index.html` with inlin
 
 **Key data mappings in `script.js`:**
 - `yearDatasetMap` — maps each year to its CMS dataset ID
-- `advancedPracticeProviderCodes` — the 5 provider specialty codes that define APPs ("42", "43", "50", "89", "97")
+- `advancedPracticeProviderCodes` — the 6 provider specialty codes that define APPs ("32", "42", "43", "50", "89", "97")
 - `validProviderSpecCodes` — full set of 60+ valid provider codes
 - `yearColumnMap` — handles the 2020 column name change
 

@@ -17,6 +17,7 @@ const clinicianTypeOrder = [
     "Physician Assistants",
     "Nurse Practitioners",
     "Certified Registered Nurse Anesthetists",
+    "Anesthesiology Assistants",
     "Certified Clinical Nurse Specialists",
     "Certified Nurse Midwives"
 ];

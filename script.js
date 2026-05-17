@@ -34,13 +34,13 @@ const yearColumnMap = {
     "2024": ["HCPCS_CD", "PROVIDER_SPEC_CD", "PSPS_SUBMITTED_SERVICE_CNT"]
 };
 
-const advancedPracticeProviderCodes = new Set(["42","43","50","89","97"]);
+const advancedPracticeProviderCodes = new Set(["32","42","43","50","89","97"]);
 
 const validProviderSpecCodes = new Set([
     "01","02","03","04","05","06","07","08","09","10",
     "11","12","13","14","16","17","18","19","20",
     "21","22","23","24","25","26","27","28","29","30",
-    "33","34","36","37","38","39","40","42","43","44",
+    "32","33","34","36","37","38","39","40","42","43","44",
     "46","50","66","72","76","77","78","79","81","82",
     "83","84","85","86","89","90","91","92","93","94",
     "97","98","99","C0","C3","C6","C7","C8","C9",
@@ -201,6 +201,7 @@ function showResultsChart(taggedData) {
         "Physician Assistants":                    "#02bfe7",
         "Nurse Practitioners":                     "#2e8540",
         "Certified Registered Nurse Anesthetists": "#e31c3d",
+        "Anesthesiology Assistants":               "#8168b3",
         "Certified Clinical Nurse Specialists":    "#fdb81e",
         "Certified Nurse Midwives":                "#981b1e",
     };
@@ -319,6 +320,7 @@ document.getElementById("queryForm").addEventListener("submit", function (e) {
                     "Physician Assistants",
                     "Nurse Practitioners",
                     "Certified Registered Nurse Anesthetists",
+                    "Anesthesiology Assistants",
                     "Certified Clinical Nurse Specialists",
                     "Certified Nurse Midwives"
                 ];
@@ -547,6 +549,7 @@ const appSpecialtyOrder = [
     { code: "97", label: "Physician Assistants" },
     { code: "50", label: "Nurse Practitioners" },
     { code: "43", label: "Certified Registered Nurse Anesthetists" },
+    { code: "32", label: "Anesthesiology Assistants" },
     { code: "89", label: "Certified Clinical Nurse Specialists" },
     { code: "42", label: "Certified Nurse Midwives" }
 ];

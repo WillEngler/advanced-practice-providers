@@ -602,6 +602,126 @@
   {
     "year": "2010",
     "procedure_codes": "31237",
+    "clinician_type": "Anesthesiology Assistants",
+    "number_of_procedures_clinician_type": 0,
+    "proportion_of_procedures_clinician_type": 0,
+    "number_of_procedures_all_clinicians": 59834
+  },
+  {
+    "year": "2011",
+    "procedure_codes": "31237",
+    "clinician_type": "Anesthesiology Assistants",
+    "number_of_procedures_clinician_type": 0,
+    "proportion_of_procedures_clinician_type": 0,
+    "number_of_procedures_all_clinicians": 63690
+  },
+  {
+    "year": "2012",
+    "procedure_codes": "31237",
+    "clinician_type": "Anesthesiology Assistants",
+    "number_of_procedures_clinician_type": 0,
+    "proportion_of_procedures_clinician_type": 0,
+    "number_of_procedures_all_clinicians": 68129
+  },
+  {
+    "year": "2013",
+    "procedure_codes": "31237",
+    "clinician_type": "Anesthesiology Assistants",
+    "number_of_procedures_clinician_type": 0,
+    "proportion_of_procedures_clinician_type": 0,
+    "number_of_procedures_all_clinicians": 72106.5
+  },
+  {
+    "year": "2014",
+    "procedure_codes": "31237",
+    "clinician_type": "Anesthesiology Assistants",
+    "number_of_procedures_clinician_type": 0,
+    "proportion_of_procedures_clinician_type": 0,
+    "number_of_procedures_all_clinicians": 73312
+  },
+  {
+    "year": "2015",
+    "procedure_codes": "31237",
+    "clinician_type": "Anesthesiology Assistants",
+    "number_of_procedures_clinician_type": 0,
+    "proportion_of_procedures_clinician_type": 0,
+    "number_of_procedures_all_clinicians": 75019
+  },
+  {
+    "year": "2016",
+    "procedure_codes": "31237",
+    "clinician_type": "Anesthesiology Assistants",
+    "number_of_procedures_clinician_type": 0,
+    "proportion_of_procedures_clinician_type": 0,
+    "number_of_procedures_all_clinicians": 78492
+  },
+  {
+    "year": "2017",
+    "procedure_codes": "31237",
+    "clinician_type": "Anesthesiology Assistants",
+    "number_of_procedures_clinician_type": 0,
+    "proportion_of_procedures_clinician_type": 0,
+    "number_of_procedures_all_clinicians": 81038
+  },
+  {
+    "year": "2018",
+    "procedure_codes": "31237",
+    "clinician_type": "Anesthesiology Assistants",
+    "number_of_procedures_clinician_type": 0,
+    "proportion_of_procedures_clinician_type": 0,
+    "number_of_procedures_all_clinicians": 81467
+  },
+  {
+    "year": "2019",
+    "procedure_codes": "31237",
+    "clinician_type": "Anesthesiology Assistants",
+    "number_of_procedures_clinician_type": 0,
+    "proportion_of_procedures_clinician_type": 0,
+    "number_of_procedures_all_clinicians": 83392
+  },
+  {
+    "year": "2020",
+    "procedure_codes": "31237",
+    "clinician_type": "Anesthesiology Assistants",
+    "number_of_procedures_clinician_type": 0,
+    "proportion_of_procedures_clinician_type": 0,
+    "number_of_procedures_all_clinicians": 61804
+  },
+  {
+    "year": "2021",
+    "procedure_codes": "31237",
+    "clinician_type": "Anesthesiology Assistants",
+    "number_of_procedures_clinician_type": 0,
+    "proportion_of_procedures_clinician_type": 0,
+    "number_of_procedures_all_clinicians": 67966
+  },
+  {
+    "year": "2022",
+    "procedure_codes": "31237",
+    "clinician_type": "Anesthesiology Assistants",
+    "number_of_procedures_clinician_type": 0,
+    "proportion_of_procedures_clinician_type": 0,
+    "number_of_procedures_all_clinicians": 71545
+  },
+  {
+    "year": "2023",
+    "procedure_codes": "31237",
+    "clinician_type": "Anesthesiology Assistants",
+    "number_of_procedures_clinician_type": 0,
+    "proportion_of_procedures_clinician_type": 0,
+    "number_of_procedures_all_clinicians": 74295
+  },
+  {
+    "year": "2024",
+    "procedure_codes": "31237",
+    "clinician_type": "Anesthesiology Assistants",
+    "number_of_procedures_clinician_type": 0,
+    "proportion_of_procedures_clinician_type": 0,
+    "number_of_procedures_all_clinicians": 80064
+  },
+  {
+    "year": "2010",
+    "procedure_codes": "31237",
     "clinician_type": "Certified Clinical Nurse Specialists",
     "number_of_procedures_clinician_type": 0,
     "proportion_of_procedures_clinician_type": 0,

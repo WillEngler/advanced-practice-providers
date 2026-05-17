@@ -1,6 +1,6 @@
 # advanced-practice-providers
 
-A small website that helps researchers see what share of Medicare Part B procedures are billed by **Advanced Practice Providers** (APPs) — physician assistants, nurse practitioners, CRNAs, clinical nurse specialists, and certified nurse midwives — versus physicians, from 2010 onward.
+A small website that helps researchers see what share of Medicare Part B procedures are billed by **Advanced Practice Providers** (APPs) — physician assistants, nurse practitioners, CRNAs, anesthesiology assistants, clinical nurse specialists, and certified nurse midwives — versus physicians, from 2010 onward.
 
 **Live site:** [open-hsr.github.io/advanced-practice-providers](https://open-hsr.github.io/advanced-practice-providers)
 

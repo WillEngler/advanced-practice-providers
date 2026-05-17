@@ -20,6 +20,7 @@ const APP_SPEC_LABELS = {
     "97": "Physician Assistants",
     "50": "Nurse Practitioners",
     "43": "Certified Registered Nurse Anesthetists",
+    "32": "Anesthesiology Assistants",
     "89": "Certified Clinical Nurse Specialists",
     "42": "Certified Nurse Midwives",
 };
@@ -29,7 +30,7 @@ const VALID_SPEC_CODES = new Set([
     "01","02","03","04","05","06","07","08","09","10",
     "11","12","13","14","16","17","18","19","20",
     "21","22","23","24","25","26","27","28","29","30",
-    "33","34","36","37","38","39","40","42","43","44",
+    "32","33","34","36","37","38","39","40","42","43","44",
     "46","50","66","72","76","77","78","79","81","82",
     "83","84","85","86","89","90","91","92","93","94",
     "97","98","99","C0","C3","C6","C7","C8","C9",
@@ -42,6 +43,7 @@ const SERIES_ORDER = [
     'Physician Assistants',
     'Nurse Practitioners',
     'Certified Registered Nurse Anesthetists',
+    'Anesthesiology Assistants',
     'Certified Clinical Nurse Specialists',
     'Certified Nurse Midwives',
 ];

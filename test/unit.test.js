@@ -81,7 +81,7 @@ describe('filterColumns', () => {
         assert.equal(out[0].provider_spec_cd, '50');
     });
 
-    it('flags all five APP specialty codes as advanced_practice_provider=1', () => {
+    it('flags every APP specialty code as advanced_practice_provider=1', () => {
         const raw = [...advancedPracticeProviderCodes].map(code => ({
             HCPCS_CD: '99213',
             PROVIDER_SPEC_CD: code,
@@ -89,7 +89,7 @@ describe('filterColumns', () => {
         }));
         const out = filterColumns(raw, '2015');
 
-        assert.equal(out.length, 5);
+        assert.equal(out.length, advancedPracticeProviderCodes.size);
         out.forEach(r => assert.equal(r.advanced_practice_provider, 1));
     });
 

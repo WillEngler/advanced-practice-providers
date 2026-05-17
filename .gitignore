@@ -1,3 +1,2 @@
-test/run_on_modal.py
-test/__pycache__/
 test/csv_reference/raw/
+.claude/

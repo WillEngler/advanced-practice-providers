@@ -18,6 +18,8 @@ const {
     filterColumns,
     collapseByAdvancedPracticeProvider,
     addAdvancedPracticePct,
+    buildAllTaggedData,
+    summarizeCodeAvailability,
 } = require('../script.js');
 
 const TOTAL_YEARS = Object.keys(yearDatasetMap).length;
@@ -259,6 +261,118 @@ describe('addAdvancedPracticePct', () => {
         ];
         const out = addAdvancedPracticePct(collapsed);
         out.forEach(r => assert.equal(r.number_of_procedures_all_clinicians, 300));
+    });
+});
+
+// ---------------------------------------------------------------------------
+// buildAllTaggedData
+// ---------------------------------------------------------------------------
+
+describe('buildAllTaggedData', () => {
+    // 8 clinician types (2 aggregate + 6 specialty) per year per block
+    const ROWS_PER_BLOCK = TOTAL_YEARS * (2 + appSpecialtyOrder.length);
+
+    const combinedData = [
+        { year: '2015', hcpcs_cd: '11111', provider_spec_cd: '50', number_of_procedures: 100, advanced_practice_provider: 1 },
+        { year: '2015', hcpcs_cd: '11111', provider_spec_cd: '01', number_of_procedures: 300, advanced_practice_provider: 0 },
+        { year: '2015', hcpcs_cd: '22222', provider_spec_cd: '97', number_of_procedures: 50,  advanced_practice_provider: 1 },
+        { year: '2015', hcpcs_cd: '22222', provider_spec_cd: '01', number_of_procedures: 50,  advanced_practice_provider: 0 },
+    ];
+
+    it('emits only the aggregate block for a single code', () => {
+        const out = buildAllTaggedData(combinedData.filter(r => r.hcpcs_cd === '11111'), ['11111']);
+        assert.equal(out.length, ROWS_PER_BLOCK);
+        out.forEach(r => assert.equal(r.procedure_codes, '11111'));
+    });
+
+    it('appends one block per code after the aggregate block for multi-code queries', () => {
+        const out = buildAllTaggedData(combinedData, ['11111', '22222']);
+        assert.equal(out.length, ROWS_PER_BLOCK * 3);
+
+        // Aggregate block first, then per-code blocks in input order
+        assert.equal(out[0].procedure_codes, '11111;22222');
+        assert.equal(out[ROWS_PER_BLOCK].procedure_codes, '11111');
+        assert.equal(out[ROWS_PER_BLOCK * 2].procedure_codes, '22222');
+    });
+
+    it('per-code counts sum to the aggregate count per (year, clinician_type)', () => {
+        const out = buildAllTaggedData(combinedData, ['11111', '22222']);
+        const appRow = codes => out.find(r =>
+            r.procedure_codes === codes && r.year === '2015' && r.clinician_type === 'Advanced Practice Providers');
+
+        assert.equal(appRow('11111').number_of_procedures_clinician_type, 100);
+        assert.equal(appRow('22222').number_of_procedures_clinician_type, 50);
+        assert.equal(appRow('11111;22222').number_of_procedures_clinician_type, 150);
+    });
+
+    it('per-code proportions use that code\'s own all-clinician denominator', () => {
+        const out = buildAllTaggedData(combinedData, ['11111', '22222']);
+        const appRow = codes => out.find(r =>
+            r.procedure_codes === codes && r.year === '2015' && r.clinician_type === 'Advanced Practice Providers');
+
+        assert.equal(appRow('11111').proportion_of_procedures_clinician_type, 100 / 400);
+        assert.equal(appRow('22222').proportion_of_procedures_clinician_type, 50 / 100);
+        assert.equal(appRow('11111;22222').proportion_of_procedures_clinician_type, 150 / 500);
+    });
+
+    it('zero-fills a per-code block for a code with no records', () => {
+        const out = buildAllTaggedData(combinedData, ['11111', '99999']);
+        const block = out.filter(r => r.procedure_codes === '99999');
+        assert.equal(block.length, ROWS_PER_BLOCK);
+        block.forEach(r => assert.equal(r.number_of_procedures_clinician_type, 0));
+    });
+});
+
+// ---------------------------------------------------------------------------
+// summarizeCodeAvailability
+// ---------------------------------------------------------------------------
+
+describe('summarizeCodeAvailability', () => {
+    it('counts total records and reportable records per code', () => {
+        const combinedData = [
+            { year: '2015', hcpcs_cd: '11111', provider_spec_cd: '04', number_of_procedures: 100, advanced_practice_provider: 0 },
+            { year: '2016', hcpcs_cd: '11111', provider_spec_cd: '04', number_of_procedures: '',  advanced_practice_provider: 0 },
+            { year: '2022', hcpcs_cd: '22222', provider_spec_cd: '50', number_of_procedures: 42,  advanced_practice_provider: 1 },
+        ];
+        const out = summarizeCodeAvailability(combinedData, ['11111', '22222']);
+
+        assert.deepEqual(out.get('11111'), { records: 2, reportable: 1 });
+        assert.deepEqual(out.get('22222'), { records: 1, reportable: 1 });
+    });
+
+    it('the S2342 shape: records exist but every count is missing or redacted', () => {
+        // Mirrors what CMS actually returns for S2342 — filterColumns turns both
+        // empty counts (all years) and "*" redactions (2021+) into ''.
+        const combinedData = [
+            { year: '2015', hcpcs_cd: 'S2342', provider_spec_cd: '04', number_of_procedures: '', advanced_practice_provider: 0 },
+            { year: '2021', hcpcs_cd: 'S2342', provider_spec_cd: '50', number_of_procedures: '', advanced_practice_provider: 1 },
+            { year: '2022', hcpcs_cd: 'S2342', provider_spec_cd: '04', number_of_procedures: '', advanced_practice_provider: 0 },
+        ];
+        const out = summarizeCodeAvailability(combinedData, ['S2342']);
+
+        assert.deepEqual(out.get('S2342'), { records: 3, reportable: 0 });
+    });
+
+    it('returns zero counts for codes with no records at all', () => {
+        const out = summarizeCodeAvailability([], ['99999']);
+        assert.deepEqual(out.get('99999'), { records: 0, reportable: 0 });
+    });
+
+    it('ignores records for codes outside the queried list', () => {
+        const combinedData = [
+            { year: '2015', hcpcs_cd: '33333', provider_spec_cd: '04', number_of_procedures: 10, advanced_practice_provider: 0 },
+        ];
+        const out = summarizeCodeAvailability(combinedData, ['11111']);
+        assert.deepEqual(out.get('11111'), { records: 0, reportable: 0 });
+        assert.equal(out.has('33333'), false);
+    });
+
+    it('counts an explicit zero as reportable (a real value, not a redaction)', () => {
+        const combinedData = [
+            { year: '2015', hcpcs_cd: '11111', provider_spec_cd: '04', number_of_procedures: 0, advanced_practice_provider: 0 },
+        ];
+        const out = summarizeCodeAvailability(combinedData, ['11111']);
+        assert.deepEqual(out.get('11111'), { records: 1, reportable: 1 });
     });
 });
 

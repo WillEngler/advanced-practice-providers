@@ -63,14 +63,40 @@ function setError(msg) {
     el.classList.toggle("visible", !!msg);
 }
 
-function setWarning(msg) {
+// lines: array of <p> nodes (see buildWarningLine). Pass "" or [] to hide.
+function setWarning(lines, heading) {
     const el = document.getElementById("warnMsg");
     const textEl = document.getElementById("warnText");
-    textEl.textContent = msg;
-    el.classList.toggle("visible", !!msg);
+    const headingEl = document.getElementById("warnHeading");
+    textEl.innerHTML = "";
+    const hasContent = Array.isArray(lines) && lines.length > 0;
+    if (hasContent) {
+        lines.forEach((line, i) => {
+            if (i > 0) line.style.marginTop = "0.5rem";
+            textEl.appendChild(line);
+        });
+        if (heading) headingEl.textContent = heading;
+    }
+    el.classList.toggle("visible", hasContent);
 }
 
-function showResultsSummary(codeList, combinedData) {
+// One warning line: plain text, then the codes bolded, then plain text.
+// Codes are user input — built as text nodes, never markup.
+function buildWarningLine(textBefore, codes, textAfter) {
+    const p = document.createElement("p");
+    p.className = "ds-c-alert__text";
+    p.appendChild(document.createTextNode(textBefore));
+    (codes || []).forEach((code, i) => {
+        if (i > 0) p.appendChild(document.createTextNode(", "));
+        const strong = document.createElement("strong");
+        strong.textContent = code;
+        p.appendChild(strong);
+    });
+    if (textAfter) p.appendChild(document.createTextNode(textAfter));
+    return p;
+}
+
+function showResultsSummary(codeList, availability) {
     const details = document.getElementById("resultsSummary");
     const list = document.getElementById("summaryList");
     list.innerHTML = "";
@@ -80,21 +106,17 @@ function showResultsSummary(codeList, combinedData) {
         return;
     }
 
-    const countsByCode = new Map(codeList.map(c => [c, 0]));
-    combinedData.forEach(record => {
-        const code = record['hcpcs_cd'];
-        if (countsByCode.has(code)) {
-            countsByCode.set(code, countsByCode.get(code) + 1);
-        }
-    });
-
     codeList.forEach(code => {
         const li = document.createElement("li");
-        const count = countsByCode.get(code);
-        li.textContent = count > 0
-            ? `${code}: ${count.toLocaleString()} records`
-            : `${code}: no records found`;
-        if (count === 0) {
+        const { records, reportable } = availability.get(code);
+        if (records === 0) {
+            li.textContent = `${code}: no records found`;
+        } else if (reportable === 0) {
+            li.textContent = `${code}: ${records.toLocaleString()} records found, but none with reportable counts`;
+        } else {
+            li.textContent = `${code}: ${records.toLocaleString()} records`;
+        }
+        if (records === 0 || reportable === 0) {
             li.style.fontWeight = "bold";
         }
         list.appendChild(li);
@@ -106,6 +128,7 @@ function showResultsSummary(codeList, combinedData) {
 function clearResults() {
     document.getElementById("resultsSummary").style.display = "none";
     document.getElementById("summaryList").innerHTML = "";
+    document.getElementById("chartPlaceholder").style.display = "none";
     hideResultsChart();
     setWarning("");
 }
@@ -214,18 +237,18 @@ function showResultsChart(taggedData) {
             const v = appYearMap.get(y);
             return typeof v === 'number' ? v * 100 : null;
         });
-        if (!dataValues.every(v => v === null || v === 0)) {
-            datasets.push({
-                label: "Advanced Practice Providers",
-                data: dataValues,
-                borderColor: colors["Advanced Practice Providers"] || "#0071bc",
-                backgroundColor: "#0071bc",
-                borderWidth: 2.5,
-                pointRadius: 4,
-                pointHoverRadius: 6,
-                tension: 0.15,
-            });
-        }
+        // An all-zero line is still drawn: the caller only builds a chart when the
+        // query has reportable data, so 0% APP is a real result, not missing data.
+        datasets.push({
+            label: "Advanced Practice Providers",
+            data: dataValues,
+            borderColor: colors["Advanced Practice Providers"] || "#0071bc",
+            backgroundColor: "#0071bc",
+            borderWidth: 2.5,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            tension: 0.15,
+        });
     }
 
     resultsChart = new Chart(ctx, {
@@ -257,7 +280,12 @@ function showResultsChart(taggedData) {
                     beginAtZero: true,
                     grid: { color: 'rgba(0,0,0,0.06)' },
                     ticks: {
-                        callback: function(value) { return value.toFixed(1) + '%'; }
+                        // Adaptive precision: hundredths when the axis spans less than
+                        // 1 percentage point, so low-volume codes stay legible
+                        callback: function(value) {
+                            const range = this.max - this.min;
+                            return value.toFixed(range < 1 ? 2 : 1) + '%';
+                        }
                     }
                 }
             }
@@ -312,36 +340,54 @@ document.getElementById("queryForm").addEventListener("submit", function (e) {
         .then(resultsPerYear => {
             hideProgress();
             const combinedData = resultsPerYear.flat();
-            const collapsedData = collapseByAdvancedPracticeProvider(combinedData);
-            const finalData = addAdvancedPracticePct(collapsedData).sort((a, b) => {
-                const clinicianTypeOrder = [
-                    "Advanced Practice Providers",
-                    "Physicians",
-                    "Physician Assistants",
-                    "Nurse Practitioners",
-                    "Certified Registered Nurse Anesthetists",
-                    "Anesthesiology Assistants",
-                    "Certified Clinical Nurse Specialists",
-                    "Certified Nurse Midwives"
-                ];
-                const labelA = getClinician_type(a);
-                const labelB = getClinician_type(b);
-                return clinicianTypeOrder.indexOf(labelA) - clinicianTypeOrder.indexOf(labelB) || Number(a.year) - Number(b.year);
+
+            // Check for codes with no records, or with records but no reportable counts
+            const availability = summarizeCodeAvailability(combinedData, codeList);
+            const missingCodes = codeList.filter(c => availability.get(c).records === 0);
+            const unreportableCodes = codeList.filter(c => {
+                const a = availability.get(c);
+                return a.records > 0 && a.reportable === 0;
             });
 
-            // Check for codes that returned no data
-            const returnedCodes = new Set(combinedData.map(r => r['hcpcs_cd']));
-            const missingCodes = codeList.filter(c => !returnedCodes.has(c));
+            const warningLines = [];
             if (missingCodes.length > 0) {
-                setWarning(
-                    `The following code${missingCodes.length > 1 ? 's' : ''} returned no records across all years: ${missingCodes.join(", ")}. ` +
-                    "This may indicate a typo."
-                );
+                warningLines.push(buildWarningLine(
+                    `The following code${missingCodes.length > 1 ? 's' : ''} returned no records across all years: `,
+                    missingCodes,
+                    ". This may indicate a typo."
+                ));
             }
-            showResultsSummary(codeList, combinedData);
+            if (unreportableCodes.length > 0) {
+                warningLines.push(buildWarningLine(
+                    `The following code${unreportableCodes.length > 1 ? 's' : ''} returned records, but none with reportable counts: `,
+                    unreportableCodes,
+                    "."
+                ));
+                warningLines.push(buildWarningLine(
+                    "CMS reports some counts as missing, or redacts them if they are under 11."
+                ));
+            }
+            showResultsSummary(codeList, availability);
 
-            const taggedData = buildTaggedData(finalData, codeList);
-            showResultsChart(taggedData);
+            const taggedData = buildAllTaggedData(combinedData, codeList);
+            // The chart shows only the all-codes aggregate block, not the per-code blocks
+            const combinedLabel = codeList.join(";");
+            const aggregateRows = taggedData.filter(r => r.procedure_codes === combinedLabel);
+            const hasReportableData = aggregateRows.some(r => Number(r.number_of_procedures_all_clinicians) > 0);
+            if (hasReportableData) {
+                showResultsChart(aggregateRows);
+            } else {
+                document.getElementById("chartPlaceholder").style.display = "block";
+            }
+
+            if (warningLines.length > 0) {
+                const single = codeList.length === 1;
+                const heading =
+                    missingCodes.length > 0 && unreportableCodes.length > 0 ? "Limited or no data for some codes"
+                    : missingCodes.length > 0 ? (single ? "No records found" : "No records found for some codes")
+                    : (single ? "No reportable counts" : "No reportable counts for some codes");
+                setWarning(warningLines, heading);
+            }
 
             // Wire up the download button for this result set
             const dlBtn = document.getElementById("downloadCsvBtn");
@@ -625,6 +671,65 @@ function getClinician_type(record) {
     return record['advanced_practice_provider'] === 1 ? "Advanced Practice Providers" : "Physicians";
 }
 
+// Per-code record availability: how many records CMS returned for each queried
+// code, and how many of those carry a reportable procedure count. A record can
+// exist yet contribute nothing — CMS returns empty counts for some rows in all
+// years, and redacts counts <11 with "*" from 2021 on (both become '' upstream).
+function summarizeCodeAvailability(combinedData, codeList) {
+    const availability = new Map(codeList.map(c => [c, { records: 0, reportable: 0 }]));
+    combinedData.forEach(record => {
+        const entry = availability.get(record['hcpcs_cd']);
+        if (!entry) return;
+        entry.records++;
+        if (record['number_of_procedures'] !== '' && record['number_of_procedures'] !== null && record['number_of_procedures'] !== undefined) {
+            entry.reportable++;
+        }
+    });
+    return availability;
+}
+
+// Output order for CSV rows and chart data
+const clinicianTypeOrder = [
+    "Advanced Practice Providers",
+    "Physicians",
+    "Physician Assistants",
+    "Nurse Practitioners",
+    "Certified Registered Nurse Anesthetists",
+    "Anesthesiology Assistants",
+    "Certified Clinical Nurse Specialists",
+    "Certified Nurse Midwives"
+];
+
+function sortFinalData(data) {
+    return data.sort((a, b) => {
+        const labelA = getClinician_type(a);
+        const labelB = getClinician_type(b);
+        return clinicianTypeOrder.indexOf(labelA) - clinicianTypeOrder.indexOf(labelB)
+            || Number(a.year) - Number(b.year);
+    });
+}
+
+// Full post-fetch pipeline for one set of records: collapse → proportions → sort → tag
+function processCombinedData(records, codeList) {
+    const collapsed = collapseByAdvancedPracticeProvider(records);
+    return buildTaggedData(sortFinalData(addAdvancedPracticePct(collapsed)), codeList);
+}
+
+// All output rows: the aggregate block across every queried code, followed (for
+// multi-code queries) by one block per individual code so users can see
+// per-code results without running separate queries. Proportions in each
+// per-code block use that code's own all-clinician denominator.
+function buildAllTaggedData(combinedData, codeList) {
+    const rows = processCombinedData(combinedData, codeList);
+    if (codeList.length > 1) {
+        codeList.forEach(code => {
+            const codeRecords = combinedData.filter(r => r['hcpcs_cd'] === code);
+            rows.push(...processCombinedData(codeRecords, [code]));
+        });
+    }
+    return rows;
+}
+
 // Build the final tagged output rows from internal data
 function buildTaggedData(data, codeList) {
     const codesValue = codeList.join(";");
@@ -693,7 +798,11 @@ if (typeof module !== 'undefined') {
         collapseByAdvancedPracticeProvider,
         addAdvancedPracticePct,
         getClinician_type,
+        summarizeCodeAvailability,
+        clinicianTypeOrder,
+        sortFinalData,
         buildTaggedData,
+        buildAllTaggedData,
         convertToCSV,
     };
 }

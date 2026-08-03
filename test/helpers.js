@@ -7,29 +7,10 @@ const {
     fetchPaginatedData,
     collapseByAdvancedPracticeProvider,
     addAdvancedPracticePct,
-    getClinician_type,
+    clinicianTypeOrder,
+    sortFinalData,
     buildTaggedData,
 } = require('../script.js');
-
-const clinicianTypeOrder = [
-    "Advanced Practice Providers",
-    "Physicians",
-    "Physician Assistants",
-    "Nurse Practitioners",
-    "Certified Registered Nurse Anesthetists",
-    "Anesthesiology Assistants",
-    "Certified Clinical Nurse Specialists",
-    "Certified Nurse Midwives"
-];
-
-function sortFinalData(data) {
-    return data.sort((a, b) => {
-        const labelA = getClinician_type(a);
-        const labelB = getClinician_type(b);
-        return clinicianTypeOrder.indexOf(labelA) - clinicianTypeOrder.indexOf(labelB)
-            || Number(a.year) - Number(b.year);
-    });
-}
 
 async function runQuery(codeList) {
     const selectedYears = Object.keys(yearDatasetMap);
@@ -46,6 +27,9 @@ async function runQuery(codeList) {
             return result;
         })
     );
+    // Aggregate block only — the browser CSV additionally appends per-code
+    // blocks for multi-code queries (buildAllTaggedData), but the consistency
+    // tests' sum-invariant is defined over the aggregate rows.
     const combinedData = resultsPerYear.flat();
     const collapsedData = collapseByAdvancedPracticeProvider(combinedData);
     const finalData = sortFinalData(addAdvancedPracticePct(collapsedData));

@@ -94,8 +94,8 @@
 
             <div id="warnMsg" class="ds-c-alert ds-c-alert--warn ds-u-margin-top--2" role="alert">
                 <div class="ds-c-alert__body">
-                    <h3 class="ds-c-alert__heading">No records found for some codes</h3>
-                    <p class="ds-c-alert__text" id="warnText"></p>
+                    <h3 class="ds-c-alert__heading" id="warnHeading">No records found for some codes</h3>
+                    <div id="warnText"></div>
                 </div>
             </div>
 
@@ -111,7 +111,23 @@
                 </div>
                 <canvas id="resultsChart"></canvas>
             </div>
+
+            <div id="chartPlaceholder" class="ds-u-margin-top--3" style="display:none; border:1px dashed var(--color-gray-light, #a6a6a6); border-radius:4px; padding:2.5rem 1rem; text-align:center; color:var(--color-muted, #555);">
+                Chart not shown &mdash; no records with reportable counts.
+            </div>
         </section>
+
+        <footer id="citation" class="ds-u-measure--wide ds-u-margin-top--7 ds-u-padding-top--2" style="border-top: 1px solid var(--color-gray-lighter, #e0e0e0);">
+            <p class="ds-text" style="font-size: 0.875rem; color: var(--color-muted, #555);">
+                More information on the development, utilization, and limitations of this web application
+                is detailed in this publication:
+            </p>
+            <blockquote class="ds-u-border-left--2 ds-u-fill--gray-lightest ds-u-padding--2 ds-u-margin-x--0 ds-u-margin-top--1 ds-u-margin-bottom--0" style="font-size: 0.875rem; color: var(--color-muted, #555);">
+                Hyman MJ, Engler W, Modi PK. Development of a Web Application to Calculate the Number
+                and Proportion of Procedures Submitted to Medicare Part B by Advanced Practice
+                Providers. <em>Surg Innov</em>. 2026;[tbd]. doi:[tbd]
+            </blockquote>
+        </footer>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>

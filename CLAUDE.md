@@ -44,9 +44,9 @@ All application logic lives in `script.js`; the UI is in `index.html` with inlin
 3. `filterColumns` normalizes column names across years (CMS renamed `SUBMITTED_SERVICE_CNT` to `PSPS_SUBMITTED_SERVICE_CNT` in 2020) and handles redacted `"*"` values (2021+)
 4. `collapseByAdvancedPracticeProvider` aggregates procedure counts by year and clinician type
 5. `addAdvancedPracticePct` calculates APP vs physician proportions
-6. `buildTaggedData` produces the final row objects used by both the chart and CSV download
+6. `buildAllTaggedData` produces the final row objects: an aggregate block across all queried codes, then (for multi-code queries) one block per individual code so users get per-code results without re-querying. The CSV download contains all blocks; the chart uses only the aggregate block.
 
-**Results display:** Line chart (Physicians omitted; they are the complement). The aggregate "All Advanced Practice Providers" line is drawn on top with heavier weight; individual specialty lines are thinner. Lines with all-zero data are omitted. Direct labels at line endpoints replace a legend.
+**Results display:** Line chart of the aggregate "Advanced Practice Providers" proportion (Physicians omitted; they are the complement). Y-axis tick precision is adaptive: hundredths when the axis spans <1 percentage point. Direct labels at line endpoints replace a legend. If no record in the whole query has a reportable count, no chart is drawn and a warning explains why. `summarizeCodeAvailability` distinguishes codes with zero records (likely typo) from codes whose records all have missing/redacted counts (e.g. S2342) — both surface in the per-code summary and the warning alert.
 
 **Key data mappings in `script.js`:**
 - `yearDatasetMap` — maps each year to its CMS dataset ID

@@ -120,6 +120,14 @@
     "number_of_procedures_all_clinicians": 80064
   },
   {
+    "year": "2025",
+    "procedure_codes": "31237",
+    "clinician_type": "Advanced Practice Providers",
+    "number_of_procedures_clinician_type": 3946,
+    "proportion_of_procedures_clinician_type": 0.046263512087602876,
+    "number_of_procedures_all_clinicians": 85294
+  },
+  {
     "year": "2010",
     "procedure_codes": "31237",
     "clinician_type": "Physicians",
@@ -238,6 +246,14 @@
     "number_of_procedures_clinician_type": 76980,
     "proportion_of_procedures_clinician_type": 0.9614808153477218,
     "number_of_procedures_all_clinicians": 80064
+  },
+  {
+    "year": "2025",
+    "procedure_codes": "31237",
+    "clinician_type": "Physicians",
+    "number_of_procedures_clinician_type": 81348,
+    "proportion_of_procedures_clinician_type": 0.9537364879123971,
+    "number_of_procedures_all_clinicians": 85294
   },
   {
     "year": "2010",
@@ -360,6 +376,14 @@
     "number_of_procedures_all_clinicians": 80064
   },
   {
+    "year": "2025",
+    "procedure_codes": "31237",
+    "clinician_type": "Physician Assistants",
+    "number_of_procedures_clinician_type": 2423,
+    "proportion_of_procedures_clinician_type": 0.028407625389828123,
+    "number_of_procedures_all_clinicians": 85294
+  },
+  {
     "year": "2010",
     "procedure_codes": "31237",
     "clinician_type": "Nurse Practitioners",
@@ -480,6 +504,14 @@
     "number_of_procedures_all_clinicians": 80064
   },
   {
+    "year": "2025",
+    "procedure_codes": "31237",
+    "clinician_type": "Nurse Practitioners",
+    "number_of_procedures_clinician_type": 1523,
+    "proportion_of_procedures_clinician_type": 0.017855886697774756,
+    "number_of_procedures_all_clinicians": 85294
+  },
+  {
     "year": "2010",
     "procedure_codes": "31237",
     "clinician_type": "Certified Registered Nurse Anesthetists",
@@ -600,6 +632,14 @@
     "number_of_procedures_all_clinicians": 80064
   },
   {
+    "year": "2025",
+    "procedure_codes": "31237",
+    "clinician_type": "Certified Registered Nurse Anesthetists",
+    "number_of_procedures_clinician_type": 0,
+    "proportion_of_procedures_clinician_type": 0,
+    "number_of_procedures_all_clinicians": 85294
+  },
+  {
     "year": "2010",
     "procedure_codes": "31237",
     "clinician_type": "Anesthesiology Assistants",
@@ -720,6 +760,14 @@
     "number_of_procedures_all_clinicians": 80064
   },
   {
+    "year": "2025",
+    "procedure_codes": "31237",
+    "clinician_type": "Anesthesiology Assistants",
+    "number_of_procedures_clinician_type": 0,
+    "proportion_of_procedures_clinician_type": 0,
+    "number_of_procedures_all_clinicians": 85294
+  },
+  {
     "year": "2010",
     "procedure_codes": "31237",
     "clinician_type": "Certified Clinical Nurse Specialists",
@@ -840,6 +888,14 @@
     "number_of_procedures_all_clinicians": 80064
   },
   {
+    "year": "2025",
+    "procedure_codes": "31237",
+    "clinician_type": "Certified Clinical Nurse Specialists",
+    "number_of_procedures_clinician_type": 0,
+    "proportion_of_procedures_clinician_type": 0,
+    "number_of_procedures_all_clinicians": 85294
+  },
+  {
     "year": "2010",
     "procedure_codes": "31237",
     "clinician_type": "Certified Nurse Midwives",
@@ -958,5 +1014,13 @@
     "number_of_procedures_clinician_type": 0,
     "proportion_of_procedures_clinician_type": 0,
     "number_of_procedures_all_clinicians": 80064
+  },
+  {
+    "year": "2025",
+    "procedure_codes": "31237",
+    "clinician_type": "Certified Nurse Midwives",
+    "number_of_procedures_clinician_type": 0,
+    "proportion_of_procedures_clinician_type": 0,
+    "number_of_procedures_all_clinicians": 85294
   }
 ]

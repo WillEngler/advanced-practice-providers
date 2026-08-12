@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-A web application to calculate the number and proportion of procedures submitted to Medicare Part B by advanced practice providers (APPs; physician assistants, nurse practitioners, certified registered nurse anesthetists, anesthesiology assistants, certified clinical nurse specialists, and certified nurse midwives) between 2010 and 2024.
+A web application to calculate the number and proportion of procedures submitted to Medicare Part B by advanced practice providers (APPs; physician assistants, nurse practitioners, certified registered nurse anesthetists, anesthesiology assistants, certified clinical nurse specialists, and certified nurse midwives) between 2010 and 2025.
 
 ## Development
 
@@ -40,13 +40,13 @@ All application logic lives in `script.js`; the UI is in `index.html` with inlin
 
 **Data pipeline flow:**
 1. User enters up to 25 semicolon-separated HCPCS procedure codes
-2. All 15 years (2010-2024) are fetched concurrently via `Promise.all()` from CMS Data API (`data.cms.gov`), with recursive pagination in 5000-record pages (`fetchPaginatedData`)
+2. All 16 years (2010-2025) are fetched concurrently via `Promise.all()` from CMS Data API (`data.cms.gov`), with recursive pagination in 5000-record pages (`fetchPaginatedData`)
 3. `filterColumns` normalizes column names across years (CMS renamed `SUBMITTED_SERVICE_CNT` to `PSPS_SUBMITTED_SERVICE_CNT` in 2020) and handles redacted `"*"` values (2021+)
 4. `collapseByAdvancedPracticeProvider` aggregates procedure counts by year and clinician type
 5. `addAdvancedPracticePct` calculates APP vs physician proportions
 6. `buildAllTaggedData` produces the final row objects: an aggregate block across all queried codes, then (for multi-code queries) one block per individual code so users get per-code results without re-querying. The CSV download contains all blocks; the chart uses only the aggregate block.
 
-**Results display:** Line chart of the aggregate "Advanced Practice Providers" proportion (Physicians omitted; they are the complement). Y-axis tick precision is adaptive: hundredths when the axis spans <1 percentage point. Direct labels at line endpoints replace a legend. If no record in the whole query has a reportable count, no chart is drawn and a warning explains why. `summarizeCodeAvailability` distinguishes codes with zero records (likely typo) from codes whose records all have missing/redacted counts (e.g. S2342) — both surface in the per-code summary and the warning alert.
+**Results display:** Line chart of the aggregate "Advanced Practice Providers" proportion (Physicians omitted; they are the complement). Y-axis tick precision is adaptive: hundredths when the axis spans <1 percentage point. Direct labels at line endpoints replace a legend. The chart is replaced by a placeholder in two cases: no record in the whole query has a reportable count (a warning also explains why), or physicians have reportable counts but APPs have none (e.g. 51570) — a flat 0% line would misread as "APPs did none" when the counts may just be redacted. The Results header with the CSV download button is independent of the chart: it appears whenever any clinician type has reportable counts, so suppressed-chart queries like 51570 still offer their physician data for download. `summarizeCodeAvailability` distinguishes codes with zero records (likely typo) from codes whose records all have missing/redacted counts (e.g. S2342) — both surface in the per-code summary and the warning alert.
 
 **Key data mappings in `script.js`:**
 - `yearDatasetMap` — maps each year to its CMS dataset ID

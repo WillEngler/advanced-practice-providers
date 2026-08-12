@@ -13,7 +13,8 @@ const yearDatasetMap = {
     "2021": "72200613-6706-4ad2-8219-e200cc4391cc",
     "2022": "e4786716-10e9-40f2-b936-7444177474d5",
     "2023": "b72adfb6-22cf-4241-9c64-050ad9061e03",
-    "2024": "647c8fa8-5dd6-460d-a2ec-18faf15b3fb2"
+    "2024": "647c8fa8-5dd6-460d-a2ec-18faf15b3fb2",
+    "2025": "aa28896d-e502-4742-8b8d-65177ff45c7a"
 };
 
 const yearColumnMap = {
@@ -31,14 +32,15 @@ const yearColumnMap = {
     "2021": ["HCPCS_CD", "PROVIDER_SPEC_CD", "PSPS_SUBMITTED_SERVICE_CNT"],
     "2022": ["HCPCS_CD", "PROVIDER_SPEC_CD", "PSPS_SUBMITTED_SERVICE_CNT"],
     "2023": ["HCPCS_CD", "PROVIDER_SPEC_CD", "PSPS_SUBMITTED_SERVICE_CNT"],
-    "2024": ["HCPCS_CD", "PROVIDER_SPEC_CD", "PSPS_SUBMITTED_SERVICE_CNT"]
+    "2024": ["HCPCS_CD", "PROVIDER_SPEC_CD", "PSPS_SUBMITTED_SERVICE_CNT"],
+    "2025": ["HCPCS_CD", "PROVIDER_SPEC_CD", "PSPS_SUBMITTED_SERVICE_CNT"]
 };
 
 const advancedPracticeProviderCodes = new Set(["32","42","43","50","89","97"]);
 
 const validProviderSpecCodes = new Set([
     "01","02","03","04","05","06","07","08","09","10",
-    "11","12","13","14","16","17","18","19","20",
+    "11","12","13","14","16","17","18","20",
     "21","22","23","24","25","26","27","28","29","30",
     "32","33","34","36","37","38","39","40","42","43","44",
     "46","50","66","72","76","77","78","79","81","82",
@@ -237,8 +239,8 @@ function showResultsChart(taggedData) {
             const v = appYearMap.get(y);
             return typeof v === 'number' ? v * 100 : null;
         });
-        // An all-zero line is still drawn: the caller only builds a chart when the
-        // query has reportable data, so 0% APP is a real result, not missing data.
+        // The caller only builds a chart when at least one year has a reportable
+        // (nonzero) APP count; otherwise a placeholder is shown instead.
         datasets.push({
             label: "Advanced Practice Providers",
             data: dataValues,
@@ -361,10 +363,7 @@ document.getElementById("queryForm").addEventListener("submit", function (e) {
                 warningLines.push(buildWarningLine(
                     `The following code${unreportableCodes.length > 1 ? 's' : ''} returned records, but none with reportable counts: `,
                     unreportableCodes,
-                    "."
-                ));
-                warningLines.push(buildWarningLine(
-                    "CMS reports some counts as missing, or redacts them if they are under 11."
+                    ". CMS reports some counts as missing, or redacts them if they are under 11."
                 ));
             }
             showResultsSummary(codeList, availability);
@@ -374,10 +373,20 @@ document.getElementById("queryForm").addEventListener("submit", function (e) {
             const combinedLabel = codeList.join(";");
             const aggregateRows = taggedData.filter(r => r.procedure_codes === combinedLabel);
             const hasReportableData = aggregateRows.some(r => Number(r.number_of_procedures_all_clinicians) > 0);
-            if (hasReportableData) {
+            // A code can have reportable physician counts while every APP count is
+            // absent or redacted (e.g. 51570) — a flat 0% line would misrepresent
+            // that as "APPs did none," so show a placeholder instead of the chart.
+            const hasReportableAppData = aggregateRows.some(r =>
+                r.clinician_type === "Advanced Practice Providers" &&
+                Number(r.number_of_procedures_clinician_type) > 0);
+            if (hasReportableData && hasReportableAppData) {
                 showResultsChart(aggregateRows);
             } else {
-                document.getElementById("chartPlaceholder").style.display = "block";
+                const placeholder = document.getElementById("chartPlaceholder");
+                placeholder.textContent = hasReportableData
+                    ? "Chart not shown — no records with reportable counts for advanced practice providers."
+                    : "Chart not shown — no records with reportable counts.";
+                placeholder.style.display = "block";
             }
 
             if (warningLines.length > 0) {
@@ -555,7 +564,7 @@ function filterColumns(data, year) {
             // Renamed but still numeric, use directly
             serviceCount = record['PSPS_SUBMITTED_SERVICE_CNT'] ?? '';
         } else {
-            // 2021–2024: string column — redacted "*" values become missing, otherwise parse as number
+            // 2021 onward: string column — redacted "*" values become missing, otherwise parse as number
             const raw = record['PSPS_SUBMITTED_SERVICE_CNT'];
             if (raw === undefined || raw === null || raw === '*') {
                 serviceCount = '';

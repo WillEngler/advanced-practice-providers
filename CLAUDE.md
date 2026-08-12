@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-A web application to calculate the number and proportion of procedures submitted to Medicare Part B by advanced practice providers (APPs; physician assistants, nurse practitioners, certified registered nurse anesthetists, anesthesiology assistants, certified clinical nurse specialists, and certified nurse midwives) between 2010 and 2024.
+A web application to calculate the number and proportion of procedures submitted to Medicare Part B by advanced practice providers (APPs; physician assistants, nurse practitioners, certified registered nurse anesthetists, anesthesiology assistants, certified clinical nurse specialists, and certified nurse midwives) between 2010 and 2025.
 
 ## Development
 
@@ -40,7 +40,7 @@ All application logic lives in `script.js`; the UI is in `index.html` with inlin
 
 **Data pipeline flow:**
 1. User enters up to 25 semicolon-separated HCPCS procedure codes
-2. All 15 years (2010-2024) are fetched concurrently via `Promise.all()` from CMS Data API (`data.cms.gov`), with recursive pagination in 5000-record pages (`fetchPaginatedData`)
+2. All 16 years (2010-2025) are fetched concurrently via `Promise.all()` from CMS Data API (`data.cms.gov`), with recursive pagination in 5000-record pages (`fetchPaginatedData`)
 3. `filterColumns` normalizes column names across years (CMS renamed `SUBMITTED_SERVICE_CNT` to `PSPS_SUBMITTED_SERVICE_CNT` in 2020) and handles redacted `"*"` values (2021+)
 4. `collapseByAdvancedPracticeProvider` aggregates procedure counts by year and clinician type
 5. `addAdvancedPracticePct` calculates APP vs physician proportions

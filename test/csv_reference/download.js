@@ -6,7 +6,7 @@
 //   node test/csv_reference/download.js
 //
 // Resumable: years already present in raw/ are skipped. Total volume is
-// roughly 11 GB across all 15 years; raw/ is gitignored.
+// roughly 12 GB across all 16 years; raw/ is gitignored.
 
 const fs = require('node:fs');
 const path = require('node:path');
@@ -34,6 +34,7 @@ const CSV_URLS = {
     "2022": "https://data.cms.gov/sites/default/files/2023-08/e25b0428-30e4-43bd-a7b7-52b1dca9a25d/Physician_Supplier_Procedure_Summary_2022_0.csv",
     "2023": "https://data.cms.gov/sites/default/files/2024-08/65dc6580-8726-4de0-b609-5138e8eff22e/Physician_Supplier_Procedure_Summary_2023.csv",
     "2024": "https://data.cms.gov/sites/default/files/2025-07/bb32bbbc-6af2-4a47-9f21-fd12d2e8e9d6/Physician_Supplier_Procedure_Summary_2024.csv",
+    "2025": "https://data.cms.gov/sites/default/files/2026-08/9b162c16-c383-44a6-99be-bac6b8951726/Physician_Supplier_Procedure_Summary_2025.csv",
 };
 
 async function downloadOne(year) {

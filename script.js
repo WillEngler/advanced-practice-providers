@@ -131,6 +131,7 @@ function clearResults() {
     document.getElementById("resultsSummary").style.display = "none";
     document.getElementById("summaryList").innerHTML = "";
     document.getElementById("chartPlaceholder").style.display = "none";
+    document.getElementById("resultsHeader").style.display = "none";
     hideResultsChart();
     setWarning("");
 }
@@ -388,6 +389,10 @@ document.getElementById("queryForm").addEventListener("submit", function (e) {
                     : "Chart not shown — no records with reportable counts.";
                 placeholder.style.display = "block";
             }
+            // The Results header (with the CSV download) appears whenever any
+            // clinician type has reportable counts — even if the chart is
+            // suppressed, the CSV still holds real physician data (e.g. 51570).
+            document.getElementById("resultsHeader").style.display = hasReportableData ? "block" : "none";
 
             if (warningLines.length > 0) {
                 const single = codeList.length === 1;
